@@ -5,34 +5,38 @@ services:
     image: bitnami/wordpress:latest
     ports:
       - 80:80
-    environment:
-      - WORDPRESS_DB_HOST=mysql
-      - WORDPRESS_DB_NAME=${MYSQL_DATABASE}
-      - WORDPRESS_DB_USER=${MYSQL_USER}
-      - WORDPRESS_DB_PASSWORD=${MYSQL_PASSWORD}
+    environment: 
+      - WORDPRESS_DB_HOST=${WORDPRESS_DB_HOST}
+      - WORDPRESS_DB_NAME=${WORDPRESS_DB_NAME}
+      - WORDPRESS_DB_USER=${WORDPRESS_DB_USER}
+      - WORDPRESS_DB_PASSWORD=${WORDPRESS_DB_PASSWORD}
+      - WORDPRESS_BLOG_NAME=${WORDPRESS_BLOG_NAME}
+      - WORDPRESS_USERNAME=${WORDPRESS_USERNAME}
+      - WORDPRESS_PASSWORD=${WORDPRESS_PASSWORD}
+      - WORDPRESS_EMAIL=${WORDPRESS_EMAIL}
     volumes:
       - wordpress_data:/bitnami/wordpress  
     depends_on:
       - mysql
     restart: always
-    networks:
+    networks: 
       - frontend-network
       - backend-network
 
   mysql:
     image: mysql:8.0
-    ports:
+    ports: 
       - 3306:3306
-    environment:
+    environment: 
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-    volumes:
+    volumes: 
       - mysql_data:/var/lib/mysql
-    restart: always
-    networks:
+    networks: 
       - backend-network
+    restart: always
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 30s
@@ -41,34 +45,34 @@ services:
 
   phpmyadmin:
     image: phpmyadmin:5.1
-    ports:
+    ports: 
       - 8080:80
-    environment:
-      - PMA_HOST=mysql
-    depends_on:
-      - mysql
-    restart: always
-    networks:
-      - frontend-network
+    environment: 
+      - PMA_HOST=${WORDPRESS_DB_HOST}
+    networks: 
       - backend-network
+      - frontend-network
+    restart: always
+    depends_on: 
+      - mysql
 
   https-portal:
     image: steveltn/https-portal:1
-    ports:
+    ports: 
       - 80:80
       - 443:443
     restart: always
     environment:
-      DOMAINS: "${DOMAIN} -> http://wordpress:80"
-      STAGE: 'production' # Don't use production until staging works
-      # FORCE_RENEW: 'true'
-    networks:
+      - DOMAINS="${DOMAIN} -> http://wordpress:80"
+      - STAGE='production' # Don't use production until staging works
+      # - FORCE_RENEW='true'
+    networks: 
       - frontend-network
 
 volumes:
   wordpress_data:
   mysql_data:
 
-networks:
-  frontend-network:
+networks: 
   backend-network:
+  frontend-network:
